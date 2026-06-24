@@ -1,79 +1,102 @@
 # Security Checks Made
 
-## Security Controls Implemented
+## Data Protection
 
-- Passwords hashed with bcrypt.
-- JWT-based authentication.
-- Buyer/admin role-based authorization.
-- Protected buyer and admin routes.
-- Zod validation for request payloads.
-- Helmet security headers.
-- Express `x-powered-by` disabled.
-- CORS restricted by `CLIENT_ORIGIN`.
-- JSON body size limit.
-- Global API rate limiting.
-- Tighter rate limiting for auth endpoints.
-- Centralized error handling with request IDs.
-- Async route error wrapper to avoid server crashes on rejected promises.
-- Production `JWT_SECRET` validation.
-- Socket.IO bid payload validation.
-- Server-side bid validation for status, deadline, and minimum increment.
-- Controlled 400 responses for invalid bids.
+| Area | What Was Done | Why It Matters |
+| --- | --- | --- |
+| Passwords | Stored with bcrypt hash, not plain text | Database leak should not expose real passwords |
+| JWT secret | Read from environment variable | Secret is not hardcoded in source |
+| Production JWT | API rejects weak/default production secret | Prevents predictable token signing |
+| Database URL | Read from environment variable | Keeps database credentials out of code |
+| `.env` files | Excluded from source zip and `.gitignore` | Prevents accidental secret sharing |
+| Review accounts | Created only by seed script | Keeps review credentials separate from production |
 
-## Manual Security Probe Results
+## API Security
 
-The local API was probed after applying seed data.
+| Check | Result | Notes |
+| --- | --- | --- |
+| Registration validation | Passed | Invalid email/password/name returns `400` |
+| Login validation | Passed | Invalid payload returns controlled error |
+| Password hash exposure | Passed | Login response does not return `passwordHash` |
+| Missing token | Passed | Protected routes return `401` |
+| Tampered token | Passed | Invalid bearer token returns `401` |
+| Buyer accessing admin users route | Passed | Buyer receives `403` |
+| Admin accessing users route | Passed | Admin receives `200` |
+| Buyer creating bike listing | Passed | Buyer receives `403` |
+| Request body validation | Passed | Zod validates API payloads |
+| Central error handling | Passed | Errors return safe messages with request IDs |
 
-Passed checks:
+## Auction and Bidding Security
 
-- `/health/ready` returned 200.
-- Helmet security headers were present.
-- `X-Powered-By` header was absent.
-- CORS did not echo an untrusted `https://evil.example` origin.
-- Invalid registration payload returned 400.
-- Buyer login returned 200.
-- Admin login returned 200.
-- Login response did not expose `passwordHash`.
-- Anonymous `/api/users` request returned 401.
-- Buyer `/api/users` request returned 403.
-- Admin `/api/users` request returned 200.
-- Buyer bike creation attempt returned 403.
-- Tampered bearer token returned 401.
-- Under-minimum bid returned controlled 400.
+| Check | Result | Notes |
+| --- | --- | --- |
+| Late bid prevention | Passed | Server rejects bids after auction end |
+| Non-live auction bid | Passed | Server accepts bids only for live auctions |
+| Minimum increment | Passed | Under-minimum bids return `400` |
+| Highest bid update | Passed | Only accepted bids update current bid |
+| Winner selection | Passed | Winner is selected from valid highest bid |
+| Reserve check | Passed | Auction can end without winner if reserve not met |
+| Realtime payload validation | Passed | Socket events validate auction and bid data |
 
-## Dependency Security
+## Browser and HTTP Security
 
-The dependency audit was run after upgrading the vulnerable Vitest dependency chain:
+| Check | Result | Notes |
+| --- | --- | --- |
+| Helmet headers | Passed | Adds safe default HTTP headers |
+| `X-Powered-By` | Passed | Express signature is disabled |
+| CORS allowlist | Passed | API only allows configured frontend origin |
+| JSON body limit | Passed | Limits large request payload abuse |
+| Global rate limit | Passed | Basic request flood protection |
+| Auth rate limit | Passed | Login/register routes have tighter limits |
+
+## Observability and Safe Debugging
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Request IDs | Passed | Each request can be traced safely |
+| Pino logging | Passed | Structured server logs are enabled |
+| Health endpoint | Passed | `/health/live` shows process health |
+| Readiness endpoint | Passed | `/health/ready` checks database access |
+| Metrics endpoint | Passed | `/metrics` exposes request counters/timings |
+| Error responses | Passed | Stack traces are not sent as normal API responses |
+
+## Dependency and Build Checks
+
+Commands run:
 
 ```bash
 npm audit --audit-level=moderate
-```
-
-Result:
-
-```text
-found 0 vulnerabilities
-```
-
-## Automated Verification
-
-```bash
 npm test
 npm run build
 ```
 
-Last verified results:
+Results:
 
-- Tests: 6 passed.
-- Production build: passed.
-- npm audit: 0 vulnerabilities.
+```text
+npm audit: 0 vulnerabilities found
+tests: 6 passed
+production build: passed
+```
+
+## Source Package Safety
+
+`SOURCE_CODE.zip` excludes:
+
+- `.env`
+- `.git`
+- `.tools`
+- `node_modules`
+- `dist`
+- local database files
+- screenshots
+- cache/build artifacts
 
 ## Remaining Production Recommendations
 
-- Run the API only over HTTPS.
+- Use HTTPS only.
 - Use PostgreSQL in production.
-- Add audit logs for admin lifecycle actions.
-- Use short-lived access tokens plus refresh-token rotation for long sessions.
-- Use object storage and malware scanning for real user-uploaded images.
-- Add Redis Socket.IO adapter for horizontal scaling.
-- Add CI dependency scanning on every pull request.
+- Add admin audit trail for every lifecycle action.
+- Add refresh-token rotation for longer sessions.
+- Add file upload scanning before supporting user-uploaded images.
+- Add Redis adapter before running multiple API instances.
+- Add CI security scanning on every pull request.

@@ -1,128 +1,122 @@
 # Deployment Instructions
 
-## Important Deployment Boundary
+## Important Point
 
-GitHub Pages can deploy only the React frontend. It cannot run:
+GitHub Pages can host only the React frontend. It cannot run the API, database, authentication backend, or Socket.IO realtime bidding.
 
-- Express API
-- Database
-- Socket.IO realtime bidding server
-- Auth/session backend
-- Admin mutations
-
-For a real working deployment, deploy the API/database separately and point GitHub Pages to it using `VITE_API_URL`.
-
-## Publish Source to GitHub
-
-The repository is prepared for:
+Use this deployment shape:
 
 ```text
-vutto-bike-auction-assignment
+GitHub Pages frontend
+Hosted Node API
+Hosted PostgreSQL database
 ```
 
-Commands:
+## 1. Publish Source to GitHub
+
+Using GitHub CLI:
 
 ```bash
 gh auth login -h github.com
 git init
 git add .
-git commit -m "Production-ready Vutto bike auction platform"
+git commit -m "Initial bike auction platform"
 gh repo create vutto-bike-auction-assignment --public --source=. --remote=origin --push
 ```
 
 If the repo already exists:
 
 ```bash
-git remote add origin https://github.com/<your-username>/vutto-bike-auction-assignment.git
+git remote add origin https://github.com/<github-user-or-org>/vutto-bike-auction-assignment.git
 git branch -M main
 git push -u origin main
 ```
 
-## GitHub Pages Frontend + Render API
+## 2. Deploy API and Database
 
-### 1. Deploy the API
+Recommended simple option: Render.
 
-Use Render for the free one-month API and database deployment. The included `render.yaml` provisions a free web service and free Postgres database.
+This repo includes `render.yaml` for:
 
-Required API env vars:
+- Node API service
+- PostgreSQL database
+- Health check path `/health/ready`
+- Production build/start commands
+
+Required API environment variables:
 
 ```text
 NODE_ENV=production
 DATABASE_URL=<postgresql-url>
 JWT_SECRET=<long-random-secret>
-CLIENT_ORIGIN=https://<your-github-username>.github.io
-PORT=<host-provided-port>
+CLIENT_ORIGIN=https://<github-user-or-org>.github.io
+PORT=<host-port>
 ```
 
-For PostgreSQL production deployments, use:
+Production commands:
 
 ```bash
 npm run render:build:api
 npm run render:start:api
 ```
 
-### 2. Configure GitHub Pages
-
-In the GitHub repository:
-
-1. Open `Settings -> Pages`.
-2. Set source to `GitHub Actions`.
-3. Open `Settings -> Secrets and variables -> Actions -> Variables`.
-4. Add:
+After deploy, check:
 
 ```text
-VITE_API_URL=https://your-hosted-api.example.com
+https://<api-host>/health/ready
 ```
 
-The workflow `.github/workflows/github-pages.yml` builds `apps/web` and deploys `apps/web/dist`.
+## 3. Seed Review Data If Needed
 
-Frontend URL:
-
-```text
-https://<your-github-username>.github.io/vutto-bike-auction-assignment/
-```
-
-Because the frontend uses hash routing, app routes look like:
-
-```text
-https://<your-github-username>.github.io/vutto-bike-auction-assignment/#/auctions
-```
-
-## Free One-Month Review Deployment
-
-For this assignment, the cheapest practical path is:
-
-```text
-GitHub Pages frontend + Render free API + Render free Postgres
-```
-
-The included `render.yaml` sets both the API service and database to `plan: free`.
-
-This is suitable for a short review period because Render free Postgres expires after 30 days. After that, you can keep the frontend on GitHub Pages and delete/suspend the Render services. The static frontend will remain visible, but live auth, bidding, admin, and database-backed pages need the API.
-
-Detailed steps are in:
-
-```text
-docs/FREE_MONTH_DEPLOYMENT.md
-```
-
-## Production Seed Policy
-
-Do not seed production unless the reviewer specifically needs sample data. For a real platform, admins should create inventory through the admin UI.
-
-If review/demo seed data is required:
+Only seed review data when required:
 
 ```bash
 DATABASE_URL="<postgresql-url>" npm --workspace apps/api run db:seed:postgres
 ```
 
-## Deployment Checklist
+For a real production system, admins should create inventory through the admin UI instead of running sample seed data.
 
-- Source pushed to GitHub.
-- API deployed with PostgreSQL.
-- API `/health/ready` returns `ok: true`.
-- `JWT_SECRET` is strong and not the local default.
-- `CLIENT_ORIGIN` matches the frontend origin.
-- GitHub Actions variable `VITE_API_URL` is set.
-- GitHub Pages uses the Actions workflow.
-- WebSocket traffic works through the chosen API host.
+## 4. Configure GitHub Pages
+
+In GitHub:
+
+1. Open repository settings.
+2. Go to `Pages`.
+3. Set source to `GitHub Actions`.
+4. Go to `Settings -> Secrets and variables -> Actions -> Variables`.
+5. Add:
+
+```text
+VITE_API_URL=https://<api-host>
+```
+
+Or with GitHub CLI:
+
+```bash
+gh variable set VITE_API_URL --body "https://<api-host>"
+gh workflow run github-pages.yml
+```
+
+Frontend URL:
+
+```text
+https://<github-user-or-org>.github.io/vutto-bike-auction-assignment/
+```
+
+## 5. Deployment Checklist
+
+- Source is pushed to GitHub.
+- API is deployed with PostgreSQL.
+- `/health/ready` returns `ok: true`.
+- `JWT_SECRET` is long and unique.
+- `CLIENT_ORIGIN` matches the GitHub Pages origin.
+- `VITE_API_URL` points to the hosted API.
+- GitHub Pages workflow completes successfully.
+- Login, auction list, auction detail, and bidding are tested after deploy.
+
+## Notes
+
+- Do not commit `.env` files.
+- Do not commit database URLs or JWT secrets.
+- Free hosting plans may sleep when idle.
+- A free temporary database may expire depending on provider limits.

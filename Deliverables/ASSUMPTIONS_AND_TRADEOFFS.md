@@ -4,7 +4,7 @@
 
 - The assignment reviewer will run the project locally with seeded data.
 - The primary business domain is used motorcycles and scooters, not cars or general vehicles.
-- Vutto-style data and public listing images are acceptable for review/demo inventory.
+- Vutto-style data and public listing images are acceptable for seeded review inventory.
 - Buyers need enough vehicle information to bid confidently, so bike details include inspection, documents, ownership, service, features, and known notes.
 - Admins are trusted internal users.
 - Production deployment should use PostgreSQL, even though local development uses SQLite.
@@ -36,9 +36,9 @@ The admin dashboard covers core lifecycle operations, users, bikes, seller leads
 
 GitHub Pages is static hosting. It is used only for the frontend workflow. The full product still needs a backend host for API, database, authentication, and WebSockets.
 
-### Demo Credentials
+### Review Credentials
 
-Demo credentials are generated only through seed data for local/review use. Production should create admin users through a controlled onboarding process and should not run demo seed data unless explicitly required.
+Review credentials are generated only through seed data for local review use. Production should create admin users through a controlled onboarding process and should not run sample seed data unless explicitly required.
 
 ### Security Scope
 

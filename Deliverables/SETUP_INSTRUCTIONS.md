@@ -1,79 +1,116 @@
 # Setup Instructions
 
-## Prerequisites
+## Requirements
 
 - Node.js 20.x
 - npm 10.x
 - Git
-- Optional: Docker Desktop for Docker Compose
+- GitHub CLI only if cloning from GitHub with `gh`
 
-## Local Setup
+No paid database is needed for local review. Local setup uses SQLite.
 
-From the repository root:
+## Option A: Run From Source Zip
+
+1. Extract `Deliverables\SOURCE_CODE.zip`.
+2. Open the extracted project folder in a terminal.
+3. Run:
+
+```bat
+Deliverables\setup-local.bat
+```
+
+The script explains each permission before it starts.
+
+## Option B: Clone With GitHub CLI
+
+Install GitHub CLI, then run:
+
+```bash
+gh auth login -h github.com
+gh repo clone <github-user-or-org>/vutto-bike-auction-assignment
+cd vutto-bike-auction-assignment
+Deliverables\setup-local.bat
+```
+
+If using normal Git:
+
+```bash
+git clone https://github.com/<github-user-or-org>/vutto-bike-auction-assignment.git
+cd vutto-bike-auction-assignment
+Deliverables\setup-local.bat
+```
+
+## What the Setup Script Does
+
+- Checks Node.js and npm.
+- Creates `apps/api/.env` from `.env.example` if missing.
+- Creates `apps/web/.env` from `.env.example` if missing.
+- Runs `npm install`.
+- Runs database migration.
+- Seeds review users and 50 bike auctions.
+- Optionally runs tests.
+- Optionally runs production build.
+- Optionally starts API and frontend.
+
+## Permissions Explained
+
+- Network access: required by `npm install` to download packages.
+- File write access: required to create `.env` files and local SQLite database files.
+- Local ports: API uses `4000`; frontend uses `5173`.
+- No administrator access is required.
+- The script does not upload project files anywhere.
+
+## Manual Setup
+
+From the project root:
 
 ```bash
 npm install
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-npm run db:migrate
-npm run db:seed
-npm run dev
 ```
 
-Windows PowerShell equivalent for copying env files:
+Windows PowerShell:
 
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
 ```
 
-## Local URLs
+macOS/Linux:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+Then:
+
+```bash
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+## Open Locally
 
 - Web app: `http://localhost:5173`
 - API health: `http://localhost:4000/health`
 - API readiness: `http://localhost:4000/health/ready`
 - API metrics: `http://localhost:4000/metrics`
 
-## Demo Accounts
+## Review Accounts
 
-These accounts are created by `npm run db:seed`:
+Created by `npm run db:seed`:
 
 ```text
 Admin: admin@bikeauction.test / Password123!
 Buyer: buyer@bikeauction.test / Password123!
 ```
 
-## Tests
+## Test and Build
 
 ```bash
-npm test
-```
-
-The test suite covers core auction lifecycle, bid validation, reserve-price behavior, tie ordering, and winner selection.
-
-## Build
-
-```bash
-npm run build
-```
-
-This compiles the API TypeScript, generates the Prisma client, compiles the frontend TypeScript, and builds Vite assets.
-
-## Useful Commands
-
-```bash
-npm --workspace apps/api run dev
-npm --workspace apps/web run dev
-npm run db:migrate
-npm run db:seed
 npm test
 npm run build
 ```
 
-## Docker Compose
-
-```bash
-docker compose up --build
-```
-
-Docker Compose is provided for local convenience. The primary local setup uses SQLite and npm scripts.
+Tests cover auction lifecycle, bid validation, reserve handling, tie ordering, and winner selection.

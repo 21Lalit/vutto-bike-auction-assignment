@@ -1,14 +1,24 @@
 # Deliverables
 
-This folder contains the assignment-facing deliverables for `vutto-bike-auction-assignment`.
+This folder is the review package for `vutto-bike-auction-assignment`.
 
-## Contents
+## Files
 
-- [Source Code](SOURCE_CODE.md)
-- [Setup Instructions](SETUP_INSTRUCTIONS.md)
-- [Architecture and Design Document](ARCHITECTURE_DESIGN.md)
-- [Deployment Instructions](DEPLOYMENT_INSTRUCTIONS.md)
-- [Security Checks Made](SECURITY_CHECKS.md)
-- [Assumptions and Trade-offs](ASSUMPTIONS_AND_TRADEOFFS.md)
+- `SOURCE_CODE.zip` - clean source package, generated without secrets or local build files.
+- `SOURCE_PACKAGE_README.md` - what is inside the zip and what is excluded.
+- `setup-local.bat` - Windows setup script for local review.
+- `SETUP_INSTRUCTIONS.md` - manual and automated local setup steps.
+- `PROJECT_SUMMARY.md` - what was built.
+- `ARCHITECTURE_DESIGN.md` - system design and folder structure.
+- `DEPLOYMENT_INSTRUCTIONS.md` - GitHub Pages frontend plus hosted API setup.
+- `SECURITY_CHECKS.md` - security checks, results, and what data is protected.
+- `ASSUMPTIONS_AND_TRADEOFFS.md` - decisions made during implementation.
+- `CHALLENGES_AND_SOLUTIONS.md` - main issues faced and how they were handled.
 
-The complete source code remains at the repository root. The files here are a review package that points to the implementation and explains the engineering decisions.
+## Recommended Review Flow
+
+1. Unzip `SOURCE_CODE.zip`.
+2. Open the extracted project folder.
+3. Run `Deliverables\setup-local.bat`.
+4. Open `http://localhost:5173`.
+5. Review the docs in this folder for architecture, security, deployment, and trade-offs.
