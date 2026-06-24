@@ -24,10 +24,8 @@ For production, use the PostgreSQL schema in `apps/api/prisma-postgres`.
 ## Release Commands
 
 ```bash
-npm ci
-npm --workspace apps/api run build:postgres
-npm --workspace apps/api run db:deploy:postgres
-npm --workspace apps/api run start
+npm run render:build:api
+npm run render:start:api
 ```
 
 ## Health Checks

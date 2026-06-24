@@ -57,8 +57,8 @@ PORT=<host-provided-port>
 For PostgreSQL production deployments, use:
 
 ```bash
-npm --workspace apps/api run db:deploy:postgres
-npm --workspace apps/api run start
+npm run render:build:api
+npm run render:start:api
 ```
 
 ### 2. Configure GitHub Pages
@@ -113,7 +113,7 @@ Do not seed production unless the reviewer specifically needs sample data. For a
 If review/demo seed data is required:
 
 ```bash
-npm run db:seed
+DATABASE_URL="<postgresql-url>" npm --workspace apps/api run db:seed:postgres
 ```
 
 ## Deployment Checklist

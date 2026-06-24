@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm ci && npm --workspace apps/api run build:postgres
-    startCommand: npm --workspace apps/api run db:deploy:postgres && npm --workspace apps/api run start
+    buildCommand: npm run render:build:api
+    startCommand: npm run render:start:api
     healthCheckPath: /health/ready
     envVars:
       - key: NODE_ENV

@@ -59,7 +59,12 @@ git push -u origin main
 https://<your-github-username>.github.io
 ```
 
-Render automatically generates `JWT_SECRET` and injects `DATABASE_URL` from the free Postgres database.
+Render automatically generates `JWT_SECRET` and injects `DATABASE_URL` from the free Postgres database. The service uses:
+
+```bash
+npm run render:build:api
+npm run render:start:api
+```
 
 After deploy, verify:
 
@@ -75,7 +80,7 @@ Local machine option:
 
 ```bash
 DATABASE_URL="<render-postgres-external-url>" npm --workspace apps/api run db:deploy:postgres
-DATABASE_URL="<render-postgres-external-url>" npm --workspace apps/api run db:seed
+DATABASE_URL="<render-postgres-external-url>" npm --workspace apps/api run db:seed:postgres
 ```
 
 Only seed if you want demo bikes/users for the assignment reviewer.
