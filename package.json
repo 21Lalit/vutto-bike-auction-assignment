@@ -11,7 +11,7 @@
     "dev:web": "npm --workspace apps/web run dev",
     "start": "npm --workspace apps/api run start",
     "build": "npm --workspaces run build",
-    "render:build:api": "npm ci && npm --workspace apps/api run build:postgres",
+    "render:build:api": "npm ci --include=dev && npm --workspace apps/api run build:postgres",
     "render:start:api": "npm --workspace apps/api run start:render",
     "test": "npm --workspace apps/api test",
     "db:migrate": "npm --workspace apps/api run db:migrate",
