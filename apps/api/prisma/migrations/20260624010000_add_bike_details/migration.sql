@@ -1,0 +1,1 @@
+ALTER TABLE "Bike" ADD COLUMN "details" TEXT;

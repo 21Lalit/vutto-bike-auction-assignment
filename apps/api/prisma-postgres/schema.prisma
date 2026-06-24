@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("USER")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  bids         Bid[]
+  wonAuctions  Auction[] @relation("AuctionWinner")
+  watchlist    WatchlistItem[]
+  inspectionRequests InspectionRequest[]
+}
+
+model SellerLead {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String
+  city          String
+  brand         String
+  model         String
+  year          Int
+  expectedPrice Int?
+  wantsPickup   Boolean  @default(true)
+  notes         String?
+  status        String   @default("NEW")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Bike {
+  id          String        @id @default(cuid())
+  title       String
+  brand       String
+  model       String
+  year        Int
+  mileage     Int
+  condition   String
+  location    String
+  photos      String
+  description String
+  details     String?
+  basePrice   Int
+  reservePrice Int?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  auctions    Auction[]
+}
+
+model Auction {
+  id              String        @id @default(cuid())
+  bikeId          String
+  bike            Bike          @relation(fields: [bikeId], references: [id], onDelete: Cascade)
+  status          String        @default("DRAFT")
+  startTime       DateTime
+  endTime         DateTime
+  minimumIncrement Int          @default(100)
+  currentBid      Int?
+  winnerId        String?
+  winner          User?         @relation("AuctionWinner", fields: [winnerId], references: [id])
+  endedAt         DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  bids            Bid[]
+  watchlistedBy   WatchlistItem[]
+  inspectionRequests InspectionRequest[]
+
+  @@index([status, startTime, endTime])
+}
+
+model Bid {
+  id        String   @id @default(cuid())
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  createdAt DateTime @default(now())
+
+  @@index([auctionId, amount])
+  @@index([userId])
+}
+
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, auctionId])
+  @@index([auctionId])
+}
+
+model InspectionRequest {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auctionId    String
+  auction      Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  preferredDate DateTime
+  type         String   @default("INSPECTION")
+  status       String   @default("REQUESTED")
+  note         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([auctionId])
+  @@index([status])
+}
